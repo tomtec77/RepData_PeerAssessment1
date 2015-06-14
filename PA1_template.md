@@ -39,11 +39,18 @@ I use the `lubridate` package to convert column `date` into a datetime object.
 ```r
 library(lubridate)
 df$date <- ymd(df$date)
-class(df$date)
+summary(df)
 ```
 
 ```
-## [1] "POSIXct" "POSIXt"
+##      steps             date               interval     
+##  Min.   :  0.00   Min.   :2012-10-01   Min.   :   0.0  
+##  1st Qu.:  0.00   1st Qu.:2012-10-16   1st Qu.: 588.8  
+##  Median :  0.00   Median :2012-10-31   Median :1177.5  
+##  Mean   : 37.38   Mean   :2012-10-31   Mean   :1177.5  
+##  3rd Qu.: 12.00   3rd Qu.:2012-11-15   3rd Qu.:1766.2  
+##  Max.   :806.00   Max.   :2012-11-30   Max.   :2355.0  
+##  NA's   :2304
 ```
 
 
@@ -96,7 +103,8 @@ print(fig1)
 ![](PA1_template_files/figure-html/figure1-1.png) 
 
 The mean total number of steps is now
-10770 steps.
+10770 steps, and the 
+median is 10760 steps.
 
 
 ## What is the average daily activity pattern?
@@ -131,10 +139,10 @@ object. Function `scale_x_datetime()` controls the x-axis format (using
 
 ```r
 library(scales)
-mean.steps$interval <- hm(format(strptime(sprintf("%04d", mean.steps$interval),
+mean.steps$timeofday <- hm(format(strptime(sprintf("%04d", mean.steps$interval),
                                           format="%H%M"),
                                  format = "%H:%M"))
-fig2 <- ggplot(mean.steps, aes(x=ymd_hms("20150101 00:00:00")+interval,
+fig2 <- ggplot(mean.steps, aes(x=ymd_hms("20150101 00:00:00")+timeofday,
                                y=avgsteps)) +
     geom_line(size=1.5) +
     xlab("Time of Day") +
@@ -148,10 +156,88 @@ print(fig2)
 
 The maximum average number of steps
 (206.20 steps) occurs at
-8H 35M 0S.
+835.
 
 ## Imputing missing values
+As noted before, there are a number of rows with NA values in the data. These
+missing data may introduce bias in summaries or calculations. First we find the
+total number of rows which contain missing data. From the summary that I printed
+after loading the data at the start, I know that missing entries only occur in
+the `steps` column.
 
+
+```r
+num.missing <- dim(df[is.na(df$steps),])[1]
+num.missing
+```
+
+```
+## [1] 2304
+```
+
+That is, 13.1 per cent of the rows
+contain missing data. This is a non-negligible percentage so I'll replace rows
+with missing data with the mean value for that time interval (after recording
+which rows originally had missing data, so as to be able to revert the changes
+should I need to). The corrected data is stored in a new data frame.
+
+
+```r
+dfnew <- df
+dfnew$wasMissing <- is.na(dfnew$steps)
+
+dfnew$steps[is.na(dfnew$steps)] <- sapply(
+    dfnew$interval[is.na(dfnew$steps)],
+    function(x) { mean.steps$avgsteps[mean.steps$interval==x] })
+```
+
+Let's look at a summary of the data we added:
+
+
+```r
+summary(filter(dfnew, wasMissing==TRUE)$steps)
+```
+
+```
+##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+##   0.000   2.486  34.110  37.380  52.830 206.200
+```
+
+Now I calculate again the histogram of the number of steps, and the mean and
+median:
+
+```r
+by_dates <- group_by(dfnew, date)
+steps.per.day.new <- summarise(by_dates, totsteps=sum(steps, na.rm=TRUE))
+summary(steps.per.day.new)
+```
+
+```
+##       date               totsteps    
+##  Min.   :2012-10-01   Min.   :   41  
+##  1st Qu.:2012-10-16   1st Qu.: 9819  
+##  Median :2012-10-31   Median :10766  
+##  Mean   :2012-10-31   Mean   :10766  
+##  3rd Qu.:2012-11-15   3rd Qu.:12811  
+##  Max.   :2012-11-30   Max.   :21194
+```
+
+```r
+fig3 <- ggplot(steps.per.day.new, aes(x=totsteps)) + 
+    geom_histogram(binwidth=2000, fill="firebrick", alpha=0.8) +
+    xlab("Total Number of Steps per Day") +
+    ylab(paste("Number of Days"))
+print(fig3)
+```
+
+![](PA1_template_files/figure-html/figure3-1.png) 
+
+The mean total number of steps for the corrected dataset is
+10770 steps, and the 
+median is 10770
+steps. Correcting the data only seems to have a minor effect (the mean is the
+same as before, and the median changed by a minor percentage and now matches the
+value of the mean).
 
 
 ## Are there differences in activity patterns between weekdays and weekends?
