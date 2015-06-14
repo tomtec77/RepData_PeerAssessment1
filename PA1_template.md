@@ -92,7 +92,15 @@ by_dates <- group_by(
     filter(df, !is.na(steps)),
     date)
 steps.per.day <- summarise(by_dates, totsteps=sum(steps, na.rm=TRUE))
+summary(steps.per.day$totsteps)
+```
 
+```
+##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+##      41    8841   10760   10770   13290   21190
+```
+
+```r
 fig1 <- ggplot(steps.per.day, aes(x=totsteps)) + 
     geom_histogram(binwidth=2000, fill="firebrick", alpha=0.8) +
     xlab("Total Number of Steps per Day") +
@@ -209,17 +217,12 @@ median:
 ```r
 by_dates <- group_by(dfnew, date)
 steps.per.day.new <- summarise(by_dates, totsteps=sum(steps, na.rm=TRUE))
-summary(steps.per.day.new)
+summary(steps.per.day.new$totsteps)
 ```
 
 ```
-##       date               totsteps    
-##  Min.   :2012-10-01   Min.   :   41  
-##  1st Qu.:2012-10-16   1st Qu.: 9819  
-##  Median :2012-10-31   Median :10766  
-##  Mean   :2012-10-31   Mean   :10766  
-##  3rd Qu.:2012-11-15   3rd Qu.:12811  
-##  Max.   :2012-11-30   Max.   :21194
+##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+##      41    9819   10770   10770   12810   21190
 ```
 
 ```r

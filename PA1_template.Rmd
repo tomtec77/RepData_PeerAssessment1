@@ -72,6 +72,7 @@ by_dates <- group_by(
     filter(df, !is.na(steps)),
     date)
 steps.per.day <- summarise(by_dates, totsteps=sum(steps, na.rm=TRUE))
+summary(steps.per.day$totsteps)
 
 fig1 <- ggplot(steps.per.day, aes(x=totsteps)) + 
     geom_histogram(binwidth=2000, fill="firebrick", alpha=0.8) +
@@ -81,8 +82,8 @@ print(fig1)
 ```
 
 The mean total number of steps is now
-`r sprintf("%d", summary(steps.per.day$totsteps)[["Mean"]])` steps, and the 
-median is `r sprintf("%d", summary(steps.per.day$totsteps)[["Median"]])` steps.
+`r sprintf("%5d", summary(steps.per.day$totsteps)[["Mean"]])` steps, and the 
+median is `r sprintf("%5d", summary(steps.per.day$totsteps)[["Median"]])` steps.
 
 
 ## What is the average daily activity pattern?
@@ -160,7 +161,7 @@ median:
 ```{r figure3, echo=TRUE}
 by_dates <- group_by(dfnew, date)
 steps.per.day.new <- summarise(by_dates, totsteps=sum(steps, na.rm=TRUE))
-summary(steps.per.day.new)
+summary(steps.per.day.new$totsteps)
 
 fig3 <- ggplot(steps.per.day.new, aes(x=totsteps)) + 
     geom_histogram(binwidth=2000, fill="firebrick", alpha=0.8) +
@@ -170,8 +171,8 @@ print(fig3)
 ```
 
 The mean total number of steps for the corrected dataset is
-`r sprintf("%d", summary(steps.per.day.new$totsteps)[["Mean"]])` steps, and the 
-median is `r sprintf("%d", summary(steps.per.day.new$totsteps)[["Median"]])`
+`r sprintf("%5d", summary(steps.per.day.new$totsteps)[["Mean"]])` steps, and the 
+median is `r sprintf("%5d", summary(steps.per.day.new$totsteps)[["Median"]])`
 steps. Correcting the data only seems to have a minor effect (the mean is the
 same as before, and the median changed by a minor percentage and now matches the
 value of the mean).

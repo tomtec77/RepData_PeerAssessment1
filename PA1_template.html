@@ -136,8 +136,10 @@ by_dates &lt;- group_by(
     filter(df, !is.na(steps)),
     date)
 steps.per.day &lt;- summarise(by_dates, totsteps=sum(steps, na.rm=TRUE))
-
-fig1 &lt;- ggplot(steps.per.day, aes(x=totsteps)) + 
+summary(steps.per.day$totsteps)</code></pre>
+<pre><code>##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+##      41    8841   10760   10770   13290   21190</code></pre>
+<pre class="r"><code>fig1 &lt;- ggplot(steps.per.day, aes(x=totsteps)) + 
     geom_histogram(binwidth=2000, fill=&quot;firebrick&quot;, alpha=0.8) +
     xlab(&quot;Total Number of Steps per Day&quot;) +
     ylab(paste(&quot;Number of Days&quot;))
@@ -196,14 +198,9 @@ dfnew$steps[is.na(dfnew$steps)] &lt;- sapply(
 <p>Now I calculate again the histogram of the number of steps, and the mean and median:</p>
 <pre class="r"><code>by_dates &lt;- group_by(dfnew, date)
 steps.per.day.new &lt;- summarise(by_dates, totsteps=sum(steps, na.rm=TRUE))
-summary(steps.per.day.new)</code></pre>
-<pre><code>##       date               totsteps    
-##  Min.   :2012-10-01   Min.   :   41  
-##  1st Qu.:2012-10-16   1st Qu.: 9819  
-##  Median :2012-10-31   Median :10766  
-##  Mean   :2012-10-31   Mean   :10766  
-##  3rd Qu.:2012-11-15   3rd Qu.:12811  
-##  Max.   :2012-11-30   Max.   :21194</code></pre>
+summary(steps.per.day.new$totsteps)</code></pre>
+<pre><code>##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+##      41    9819   10770   10770   12810   21190</code></pre>
 <pre class="r"><code>fig3 &lt;- ggplot(steps.per.day.new, aes(x=totsteps)) + 
     geom_histogram(binwidth=2000, fill=&quot;firebrick&quot;, alpha=0.8) +
     xlab(&quot;Total Number of Steps per Day&quot;) +
