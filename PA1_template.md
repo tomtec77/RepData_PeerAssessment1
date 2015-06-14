@@ -241,3 +241,50 @@ value of the mean).
 
 
 ## Are there differences in activity patterns between weekdays and weekends?
+To answer this question, I'll create a new column to flag which day is a weekday
+and which day is a weekend, using the corrected dataset.
+
+
+```r
+# This is to set my locale to en_US so that the weekdays() function outputs
+# names of days in English, otherwise they come out in Spanish :)
+Sys.setlocale(locale="en_US.UTF-8")
+```
+
+```
+## [1] "LC_CTYPE=en_US.UTF-8;LC_NUMERIC=C;LC_TIME=en_US.UTF-8;LC_COLLATE=en_US.UTF-8;LC_MONETARY=en_US.UTF-8;LC_MESSAGES=en_US.UTF-8;LC_PAPER=es_CL.UTF-8;LC_NAME=C;LC_ADDRESS=C;LC_TELEPHONE=C;LC_MEASUREMENT=es_CL.UTF-8;LC_IDENTIFICATION=C"
+```
+
+```r
+dfnew$daytype <- ifelse(weekdays(dfnew$date) %in% c("Saturday", "Sunday"),
+                        "weekend", "weekday")
+dfnew$daytype <- as.factor(dfnew$daytype)
+```
+
+Below I plot the time series for mean number of steps, separating weekdays (top
+panel, red) from weekends (bottom panel, blue).
+
+
+```r
+by_interval <- group_by(dfnew, interval, daytype)
+mean.steps.weekday <- summarise(by_interval, avgsteps=mean(steps))
+
+mean.steps.weekday$timeofday <- hm(format(strptime(
+    sprintf("%04d", mean.steps.weekday$interval),
+    format="%H%M"),
+    format = "%H:%M"))
+mean.steps.weekday$timestamp <- ymd_hms("20150101 00:00:00")+
+    mean.steps.weekday$timeofday
+
+dfplot <- select(mean.steps.weekday, -timeofday)
+fig4 <- ggplot(dfplot, aes(x=timestamp, y=avgsteps, color=daytype)) +
+    geom_line(size=1.5) +
+    xlab("Time of Day") +
+    scale_x_datetime(breaks=date_breaks("2 hours"),
+                     labels=date_format("%H:%M")) + 
+    ylab("Mean Number of Steps") +
+    facet_grid(daytype ~ .)
+print(fig4)
+```
+
+![](PA1_template_files/figure-html/figure 4-1.png) 
