@@ -100,8 +100,55 @@ The mean total number of steps is now
 
 
 ## What is the average daily activity pattern?
+To find the average daily activity pattern I'll use `summarise()` again, but
+now grouping by time interval identifier and taking the mean number of steps
+(after removing again all rows with NA values in `steps`).
 
 
+```r
+by_interval <- group_by(
+    filter(df, !is.na(steps)),
+    interval)
+mean.steps <- summarise(by_interval, avgsteps=mean(steps))
+summary(mean.steps)
+```
+
+```
+##     interval         avgsteps      
+##  Min.   :   0.0   Min.   :  0.000  
+##  1st Qu.: 588.8   1st Qu.:  2.486  
+##  Median :1177.5   Median : 34.113  
+##  Mean   :1177.5   Mean   : 37.383  
+##  3rd Qu.:1766.2   3rd Qu.: 52.835  
+##  Max.   :2355.0   Max.   :206.170
+```
+
+To plot the results as a time series, I'll convert the identifier label (which I
+assume is the time of day in hours and minutes, in 24hr format) to a datetime
+object. Function `scale_x_datetime()` controls the x-axis format (using 
+`date_breaks()` and `date_format()` from the `scales` package.)
+
+
+```r
+library(scales)
+mean.steps$interval <- hm(format(strptime(sprintf("%04d", mean.steps$interval),
+                                          format="%H%M"),
+                                 format = "%H:%M"))
+fig2 <- ggplot(mean.steps, aes(x=ymd_hms("20150101 00:00:00")+interval,
+                               y=avgsteps)) +
+    geom_line(size=1.5) +
+    xlab("Time of Day") +
+    scale_x_datetime(breaks=date_breaks("2 hours"),
+                     labels=date_format("%H:%M")) + 
+    ylab("Mean Number of Steps") 
+print(fig2)
+```
+
+![](PA1_template_files/figure-html/figure 2-1.png) 
+
+The maximum average number of steps
+(206.20 steps) occurs at
+8H 35M 0S.
 
 ## Imputing missing values
 
